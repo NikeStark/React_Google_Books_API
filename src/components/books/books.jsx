@@ -3,7 +3,7 @@ import SearchArea from '../search-area/search-area.jsx';
 import BookList from '../book-list/book-list.jsx';
 import request from 'superagent';
 
-import './Books.css'
+import './Books.css';
 
 
 export default class Books extends Component{
@@ -23,8 +23,9 @@ export default class Books extends Component{
             .query({q: this.state.searchField})
             .then((data) => {
                 console.log(data)
+                const cleanData = this.cleanData(data)
                 this.setState({
-                    books: [...data.body.items]
+                    books: [cleanData]
                 })
             })
     }
@@ -43,16 +44,42 @@ export default class Books extends Component{
         })
     }
 
+    cleanData = (data) => {
+        const cleanedData = data.body.items.map((book) => {
+            if(book.volumeInfo.hasOwnProperty('publishedDate') === false){
+                book.volumeInfo['publishedDate'] = '0000';
+            }
+             else if(book.volumeInfo.hasOwnProperty('imageLinks') === false){
+                book.volumeInfo['imageLinks'] = {thumbnail: ''};
+            }
+
+            return book;
+        })
+
+        return cleanedData;
+    }
+
     render(){
 
-        const {books} = this.state
+        const {books, sort} = this.state
 
+        const sortedBooks = books.sort((a, b) => {
+            if(sort === 'Newest'){
+                return  parseInt(b.volumeInfo.publishedDate.substring(0, 4)) - 
+                        parseInt(a.volumeInfo.publishedDate.substring(0, 4));
+            }
+            else if(sort === 'Oldest'){
+                return  parseInt(a.volumeInfo.publishedDate.substring(0, 4)) - 
+                        parseInt(b.volumeInfo.publishedDate.substring(0, 4));
+            }   
+        })
+   
         return(
             <div style={{color:'white'}}>
                 <SearchArea searchBook={this.onSearchBook} 
-                            handleSearch={this.onHandleSearch} 
-                            handleSort={this.onHandleSort}/>
-                {/*<BookList listOfBooks={books}/>*/}
+                    handleSearch={this.onHandleSearch} 
+                    handleSort={this.onHandleSort}/>
+                <BookList listOfBooks={sortedBooks}/>
             </div>
         )
     }

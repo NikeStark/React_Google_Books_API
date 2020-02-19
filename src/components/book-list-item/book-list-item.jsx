@@ -7,8 +7,8 @@ const BookListItem = ({image, title, author, published}) => {
         <div className="card-container">
                 <img src={image} className="api-image"></img>
                 <h2>{title}</h2>
-                <h3>{author}</h3>
-                <span>{published}</span>
+                <h3>Author: {author}</h3>
+                <span>Published Date: {published === '0000' ? 'Not available' : published}</span>
             </div>
     )
 }
